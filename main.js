@@ -8,9 +8,9 @@ var vk = new VK({});
 
 vk.setOptions({
     app: 6005112,
-    login: 'leoweyfreelancewallet@yandex.ru',
-    pass: 'blitz3dfastextmangoworms12345',
-    phone: '+79683373481'
+    login: '',
+    pass: '',
+    phone: ''
 });
 
 
@@ -18,7 +18,7 @@ vk.setOptions({
 
 
 
-vk.setToken("41730f1cc6e1cc35b845f23a505f1e8053eb1800c836632539284521584288f0f76dbcbe077772297611e");
+vk.setToken("");
 
 var members = new Members(vk, client, "vaporlab");
 
