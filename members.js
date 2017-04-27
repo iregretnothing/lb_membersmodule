@@ -1,51 +1,53 @@
 
-var log = require('fancy-log');
+const log = require('fancy-log');
+
 
 module.exports = members = function(vk, client, groupId) {
 	this.vk = vk;
 	this.client = client;
 	this.groupId = groupId;
+	this.redisKey = 'members_' + this.groupId;
 }
+
 
 members.prototype.loadAll = function () {
 
-	// let vk = this.vk;
-	// let client = this.client;
-	// let groupId = this.groupId;
-
 	return new Promise(
 		(resolve, reject) => {
-			this.vk.collect.groups.getMembers({
-				group_id: groupId
-			})
-			.then( (members) => {
-				this.client.zadd( 'members_' + this.groupId, members, (err, reply) => {
-					if (err) {
-						log.error('Error by getAllMembers function:\n'+err);
-						reject(err);
-					} else {
-						log('Got members');
-					}
-					resolve(members);
-				});
-			})
-			.catch(function(error) {
-				reject(error);
+			this.client.exists(this.redisKey, (err, reply) => {
+				if (!reply) {
+					this.vk.collect.groups.getMembers({
+						group_id: this.groupId
+					})
+					.then((members) => {
+						this.client.zadd(this.redisKey, members, (err, reply) => {
+							if (err) {
+								log.error('Error by loadAll function:\n'+err);
+								reject(err);
+							} else {
+								log('Got members');
+							}
+							resolve(members);
+						});
+					})
+					.catch((error) => {
+						reject(error);
+					});
+				} else {
+					log('Members list "'+this.redisKey+'" allready exist');
+				}
 			});
 		}
 	);
 
-
 }
+
 
 members.prototype.isMember = function (userId) {	
 
-	//let client = this.client;
-	//let groupId = this.groupId;
-
 	return new Promise(
 		(resolve, reject) => {
-			this.client.zscore( 'members_' + this.groupId, userId, (err, reply) => {
+			this.client.zscore(this.redisKey, userId, (err, reply) => {
 
 				if (err) {
 					log.error('Problem with finding id{'+userId+'}\n'+err);
@@ -60,7 +62,6 @@ members.prototype.isMember = function (userId) {
 								
 					resolve(reply);
 				}
-
 			});
 		}
 	);
@@ -68,17 +69,16 @@ members.prototype.isMember = function (userId) {
 }
 
 
-
 members.prototype.add = function (userId) {
 
 	return new Promise(
-		function(resolve, reject) {
-			client.zadd( 'members_' + this.groupId, 1, userId, (err, reply) => {
+		(resolve, reject) => {
+			client.zadd(this.redisKey, 1, userId, (err, reply) => {
 				if (err) {
 					log.error('Problem with addind id{'+userId+'}\n'+err);
 					reject(err);
 				} else {
-					log('Member id{'+userId+'} added')
+					log('Member id{'+userId+'} added');
 					resolve(reply);
 				}
 			});
@@ -88,16 +88,11 @@ members.prototype.add = function (userId) {
 }
 
 
-
-
-
-
-
 members.prototype.remove = function (userId) {
 
 	return new Promise(
-		function (resolve, reject) {
-			client.zrem( 'members_' + this.groupId, userId, function (err, reply) {
+		(resolve, reject) => {
+			client.zrem(this.redisKey, userId, (err, reply) => {
 				if (err) {
 					log.error('Problem with deleting id{'+userId+'}\n'+err);
 					reject(err);
