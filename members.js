@@ -1,14 +1,12 @@
 
 const log = require('fancy-log');
 
-
 module.exports = members = function(vk, client, groupId) {
 	this.vk = vk;
 	this.client = client;
 	this.groupId = groupId;
 	this.redisKey = 'members_' + this.groupId;
 }
-
 
 members.prototype.loadAll = function () {
 
@@ -22,7 +20,7 @@ members.prototype.loadAll = function () {
 					.then((members) => {
 						this.client.zadd(this.redisKey, members, (err, reply) => {
 							if (err) {
-								log.error('Error by loadAll function:\n'+err);
+								log.error('Error: ', 'Problem with loadAll function:\n'+err);
 								reject(err);
 							} else {
 								log('Got members');
@@ -43,7 +41,6 @@ members.prototype.loadAll = function () {
 
 }
 
-
 members.prototype.isMember = function (userId) {	
 
 	return new Promise(
@@ -51,7 +48,7 @@ members.prototype.isMember = function (userId) {
 			this.client.zscore(this.redisKey, userId, (err, reply) => {
 
 				if (err) {
-					log.error('Problem with finding id{'+userId+'}\n'+err);
+					log.error('Error: ', 'Problem with finding id{'+userId+'}\n'+err);
 					reject(err);
 				} else {
 				
@@ -69,14 +66,13 @@ members.prototype.isMember = function (userId) {
 
 }
 
-
 members.prototype.add = function (userId) {
 
 	return new Promise(
 		(resolve, reject) => {
 			this.client.zadd(this.redisKey, 1, userId, (err, reply) => {
 				if (err) {
-					log.error('Problem with addind id{'+userId+'}\n'+err);
+					log.error('Error: ', 'Problem with addind id{'+userId+'}\n'+err);
 					reject(err);
 				} else {
 					log('Member id{'+userId+'} added');
@@ -88,14 +84,13 @@ members.prototype.add = function (userId) {
 
 }
 
-
 members.prototype.remove = function (userId) {
 
 	return new Promise(
 		(resolve, reject) => {
 			this.client.zrem(this.redisKey, userId, (err, reply) => {
 				if (err) {
-					log.error('Problem with deleting id{'+userId+'}\n'+err);
+					log.error('Error: ', 'Problem with deleting id{'+userId+'}\n'+err);
 					reject(err);
 				} else {
 					log('Member id{'+userId+'} deleted');
