@@ -7,16 +7,17 @@ client = redis.createClient();
 var vk = new VK({});
 
 vk.setOptions({
-    app: 0,
-    login: '@.ru',
-    pass: '',
-    phone: ''
+    app: 6005112,
+    login: 'leoweyfreelancewallet@yandex.ru',
+    pass: 'blitz3dfastextmangoworms12345',
+    phone: '+79683373481'
 });
 
-vk.setToken("");
+vk.setToken("41730f1cc6e1cc35b845f23a505f1e8053eb1800c836632539284521584288f0f76dbcbe077772297611e");
 
-var vaporlab = new Members(vk, client, "vaporlab");
+var members = new Members(vk, client, "vaporlab");
 
-//vaporlab.getAllMembers(function(){console.log("wew")});
-//vaporlab.isMember(858, function(res){console.log(res)});
-//vaporlab.delId(2363459);
+members.getAllMembers(function(){console.log("wew")});
+ //members.isMember(858, function(res){console.log(res)});
+
+// members.delId(2363459);
