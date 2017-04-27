@@ -35,6 +35,7 @@ members.prototype.loadAll = function () {
 					});
 				} else {
 					log('Members list "'+this.redisKey+'" allready exist');
+					resolve(members);
 				}
 			});
 		}
@@ -73,7 +74,7 @@ members.prototype.add = function (userId) {
 
 	return new Promise(
 		(resolve, reject) => {
-			client.zadd(this.redisKey, 1, userId, (err, reply) => {
+			this.client.zadd(this.redisKey, 1, userId, (err, reply) => {
 				if (err) {
 					log.error('Problem with addind id{'+userId+'}\n'+err);
 					reject(err);
@@ -92,7 +93,7 @@ members.prototype.remove = function (userId) {
 
 	return new Promise(
 		(resolve, reject) => {
-			client.zrem(this.redisKey, userId, (err, reply) => {
+			this.client.zrem(this.redisKey, userId, (err, reply) => {
 				if (err) {
 					log.error('Problem with deleting id{'+userId+'}\n'+err);
 					reject(err);
