@@ -1,59 +1,90 @@
 
-module.exports = members = function(vk, client, group_id) {
+module.exports = members = function(vk, client, groupId) {
 	this.vk = vk;
 	this.client = client;
-	this.group_id = group_id;
+	this.groupId = 'members_' + groupId;
 }
 
-members.prototype.getAllMembers = function(callback) {
+members.prototype.getAllMembers = function() {
 
 	let vk = this.vk;
 	let client = this.client;
-	let group_id = this.group_id;
+	let groupId = this.groupId;
 
-	client.del(group_id, function() {
-
-		vk.collect.groups.getMembers({
-			group_id: group_id
-		})
-		.then(function(members) {
-			client.lpush(group_id, members, function() {
-				callback();
+	let promise = new Promise(
+		function(resolve, reject) {
+			vk.collect.groups.getMembers({
+				group_id: groupId
+			})
+			.then(function(members) {
+				client.zadd(groupId, members, function() {
+					resolve(members);
+				});
+			})
+			.catch(function(error) {
+				reject(error);
 			});
-		})
-		.catch(function(error) {
-			console.error(error);
-		});
+		}
+	);
 
-	});
+	return promise;
 
 }
 
-members.prototype.isMember = function(user_id, callback) {	
+members.prototype.isMember = function(user_id) {	
 
 	let client = this.client;
-	let group_id = this.group_id;
+	let groupId = this.groupId;
 
-	client.lrange(group_id, 0, -1, function(err, reply) {
+	let promise = new Promise(
+		function(resolve, reject) {
+			client.zscore(groupId, user_id, function(err, reply) {
 
-		if(err) {
-			callback(err)
+				if (err) {
+					reject(err);
+				} else {
+					resolve(reply);
+				}
+
+			});
 		}
+	);
 
-		reply.forEach(function(value, i) {
-			if(value == user_id) {
-				callback(i);
-			}
-		});
-
-	});
+	return promise;
 
 }
 
-members.prototype.setId = function(user_id, callback) {
-	client.lpush(this.group_id, user_id, callback);
+members.prototype.setId = function(user_id) {
+
+	let promise = new Promise(
+		function(resolve, reject) {
+			client.zadd(this.groupId, user_id, function(err, reply) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(reply);
+				}
+			});
+		}
+	);
+
+	return promise;
+
 }
 
-members.prototype.delId = function(user_id, callback) {
-	client.lrem(this.group_id, 0, user_id, callback);
+members.prototype.delId = function(user_id) {
+
+	let promise = new Promise(
+		function(resolve, reject) {
+			client.zrem(this.groupId, user_id, function(err, reply) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(reply);
+				}
+			});
+		}
+	); 
+
+	return promise;
 }
