@@ -7,9 +7,9 @@ module.exports = members = function(vk, client, group_id) {
 
 members.prototype.getAllMembers = function(callback) {
 
-	const vk = this.vk;
-	const client = this.client;
-	const group_id = this.group_id;
+	let vk = this.vk;
+	let client = this.client;
+	let group_id = this.group_id;
 
 	client.del(group_id, function() {
 
@@ -31,8 +31,8 @@ members.prototype.getAllMembers = function(callback) {
 
 members.prototype.isMember = function(user_id, callback) {	
 
-	const client = this.client;
-	const group_id = this.group_id;
+	let client = this.client;
+	let group_id = this.group_id;
 
 	client.lrange(group_id, 0, -1, function(err, reply) {
 
