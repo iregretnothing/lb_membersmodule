@@ -20,7 +20,7 @@ members.prototype.loadAll = function () {
 					.then((members) => {
 						this.client.zadd(this.redisKey, members, (err, reply) => {
 							if (err) {
-								log.error('Error: ', 'Problem with loadAll function:\n'+err);
+								log.error('Error: ', `Problem with loadAll function:\n${err}`);
 								reject(err);
 							} else {
 								log('Got members');
@@ -32,7 +32,7 @@ members.prototype.loadAll = function () {
 						reject(error);
 					});
 				} else {
-					log('Members list "'+this.redisKey+'" allready exist');
+					log(`Members list ${this.redisKey} allready exist`);
 					resolve(members);
 				}
 			});
@@ -48,14 +48,14 @@ members.prototype.isMember = function (userId) {
 			this.client.zscore(this.redisKey, userId, (err, reply) => {
 
 				if (err) {
-					log.error('Error: ', 'Problem with finding id{'+userId+'}\n'+err);
+					log.error('Error: ', `Problem with finding id ${userId}\n${err}`);
 					reject(err);
 				} else {
 				
 					if (reply !== null) {
-						log('Id{'+userId+'} is member of "'+this.groupId+'" group');		
+						log(`Id ${userId} is member of ${this.groupId} group`);		
 					} else {
-						log('Member id{'+userId+'} not found at group "'+this.groupId+'"');
+						log(`Member id ${userId} not found at group ${this.groupId}`);
 					}
 								
 					resolve(reply);
@@ -72,10 +72,10 @@ members.prototype.add = function (userId) {
 		(resolve, reject) => {
 			this.client.zadd(this.redisKey, 1, userId, (err, reply) => {
 				if (err) {
-					log.error('Error: ', 'Problem with addind id{'+userId+'}\n'+err);
+					log.error('Error: ', `Problem with addind id ${userId}\n${err}`);
 					reject(err);
 				} else {
-					log('Member id{'+userId+'} added');
+					log(`Member id ${userId} added`);
 					resolve(reply);
 				}
 			});
@@ -90,10 +90,10 @@ members.prototype.remove = function (userId) {
 		(resolve, reject) => {
 			this.client.zrem(this.redisKey, userId, (err, reply) => {
 				if (err) {
-					log.error('Error: ', 'Problem with deleting id{'+userId+'}\n'+err);
+					log.error('Error: ', 'Problem with deleting id ${userId}\n'+err);
 					reject(err);
 				} else {
-					log('Member id{'+userId+'} deleted');
+					log(`Member id ${userId} deleted`);
 					resolve(reply);
 				}
 			});
