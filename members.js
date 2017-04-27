@@ -1,23 +1,31 @@
 
+var log = require('fancy-log');
+
 module.exports = members = function(vk, client, groupId) {
 	this.vk = vk;
 	this.client = client;
-	this.groupId = 'members_' + groupId;
+	this.groupId = groupId;
 }
 
-members.prototype.getAllMembers = function() {
+members.prototype.loadAll = function () {
 
-	let vk = this.vk;
-	let client = this.client;
-	let groupId = this.groupId;
+	// let vk = this.vk;
+	// let client = this.client;
+	// let groupId = this.groupId;
 
-	let promise = new Promise(
-		function(resolve, reject) {
-			vk.collect.groups.getMembers({
+	return new Promise(
+		(resolve, reject) => {
+			this.vk.collect.groups.getMembers({
 				group_id: groupId
 			})
-			.then(function(members) {
-				client.zadd(groupId, members, function() {
+			.then( (members) => {
+				this.client.zadd( 'members_' + this.groupId, members, (err, reply) => {
+					if (err) {
+						log.error('Error by getAllMembers function:\n'+err);
+						reject(err);
+					} else {
+						log('Got members');
+					}
 					resolve(members);
 				});
 			})
@@ -27,22 +35,29 @@ members.prototype.getAllMembers = function() {
 		}
 	);
 
-	return promise;
 
 }
 
-members.prototype.isMember = function(user_id) {	
+members.prototype.isMember = function (userId) {	
 
-	let client = this.client;
-	let groupId = this.groupId;
+	//let client = this.client;
+	//let groupId = this.groupId;
 
-	let promise = new Promise(
-		function(resolve, reject) {
-			client.zscore(groupId, user_id, function(err, reply) {
+	return new Promise(
+		(resolve, reject) => {
+			this.client.zscore( 'members_' + this.groupId, userId, (err, reply) => {
 
 				if (err) {
+					log.error('Problem with finding id{'+userId+'}\n'+err);
 					reject(err);
 				} else {
+				
+					if (reply !== null) {
+						log('Id{'+userId+'} is member of "'+this.groupId+'" group');		
+					} else {
+						log('Member id{'+userId+'} not found at group "'+this.groupId+'"');
+					}
+								
 					resolve(reply);
 				}
 
@@ -50,41 +65,48 @@ members.prototype.isMember = function(user_id) {
 		}
 	);
 
-	return promise;
-
 }
 
-members.prototype.setId = function(user_id) {
 
-	let promise = new Promise(
+
+members.prototype.add = function (userId) {
+
+	return new Promise(
 		function(resolve, reject) {
-			client.zadd(this.groupId, user_id, function(err, reply) {
+			client.zadd( 'members_' + this.groupId, 1, userId, (err, reply) => {
 				if (err) {
+					log.error('Problem with addind id{'+userId+'}\n'+err);
 					reject(err);
 				} else {
+					log('Member id{'+userId+'} added')
 					resolve(reply);
 				}
 			});
 		}
 	);
 
-	return promise;
-
 }
 
-members.prototype.delId = function(user_id) {
 
-	let promise = new Promise(
-		function(resolve, reject) {
-			client.zrem(this.groupId, user_id, function(err, reply) {
+
+
+
+
+
+members.prototype.remove = function (userId) {
+
+	return new Promise(
+		function (resolve, reject) {
+			client.zrem( 'members_' + this.groupId, userId, function (err, reply) {
 				if (err) {
+					log.error('Problem with deleting id{'+userId+'}\n'+err);
 					reject(err);
 				} else {
+					log('Member id{'+userId+'} deleted');
 					resolve(reply);
 				}
 			});
 		}
 	); 
 
-	return promise;
 }
