@@ -7,7 +7,7 @@ client = redis.createClient();
 var vk = new VK({});
 
 vk.setOptions({
-    app: 6005112,
+    app: 0,
     login: 'leoweyfreelancewallet@yandex.ru',
     pass: '',
     phone: ''
