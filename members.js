@@ -14,11 +14,11 @@ members.prototype.getAllMembers = function(callback) {
 	var step = 1000;
 
 	client.del(group_id, function() {
-		stepGet(group_id, step, 0, 0, callback);
+		stepGet(group_id, step, 0, callback);
 	});
 
 	
-	function stepGet(group_id, step, i, count, callback) {
+	function stepGet(group_id, step, i, callback) {
 		vk.api.groups.getMembers({
 	            group_id: group_id,
 	            count: step,
@@ -27,9 +27,8 @@ members.prototype.getAllMembers = function(callback) {
 	        .then( function(members) {
 	        	client.lpush(group_id, members.items);
 	        	i += step;
-	        	var count = members.count;
-	        	if(i<count) {
-	        		stepGet(group_id, step, i, count, callback);
+	        	if(i<members.count) {
+	        		stepGet(group_id, step, i, callback);
 	        	} else {
 	        		callback();
 	        	}
